@@ -1,0 +1,47 @@
+[
+    {
+        "asset_id": 1467361003,
+        "type": "power",
+        "name": "Unnamed Asset",
+        "lat": 19.7160545,
+        "lon": 85.5155839,
+        "exposure_score": 0.9,
+        "hazard_type": "Storm Surge"
+    },
+    {
+        "asset_id": 219118258,
+        "type": "arterial_road",
+        "name": "Unnamed Asset",
+        "lat": 19.7050075,
+        "lon": 85.5070334,
+        "exposure_score": 0.6,
+        "hazard_type": "Storm Surge"
+    },
+    {
+        "asset_id": 746288616,
+        "type": "arterial_road",
+        "name": "Marine Drive Road",
+        "lat": 19.7912427,
+        "lon": 85.8123779,
+        "exposure_score": 0.6,
+        "hazard_type": "Storm Surge"
+    },
+    {
+        "asset_id": 866559620,
+        "type": "arterial_road",
+        "name": "Unnamed Asset",
+        "lat": 19.6908787,
+        "lon": 85.4738063,
+        "exposure_score": 0.6,
+        "hazard_type": "Storm Surge"
+    },
+    {
+        "asset_id": 877786316,
+        "type": "arterial_road",
+        "name": "Unnamed Asset",
+        "lat": 19.7446312,
+        "lon": 85.5728826,
+        "exposure_score": 0.6,
+        "hazard_type": "Storm Surge"
+    }
+]
