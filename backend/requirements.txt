@@ -12,14 +12,6 @@ cryptography==50.0.1
 fastapi==0.141.1
 geojson==3.3.0
 geopandas==1.1.4
-google-ai-generativelanguage==0.6.15
-google-api-core==2.33.0
-google-api-python-client==2.200.0
-google-auth==2.58.1
-google-auth-httplib2==0.4.2
-googleapis-common-protos==1.75.0
-grpcio==1.84.0
-grpcio-status==1.71.2
 h11==0.16.0
 httplib2==0.32.0
 idna==3.20
