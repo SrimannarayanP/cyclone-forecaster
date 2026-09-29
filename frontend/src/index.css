@@ -1,0 +1,21 @@
+/* index.css */
+
+
+@import "tailwindcss";
+
+
+@theme {
+    --color-brutal-bg: #e0e0e0;
+    --color-brutal-border: #000000;
+    --color-brutal-accent: #ff3b3b;
+    --color-brutal-surface: #ffffff;
+
+    --shadow-brutal: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+    --shadow-brutal-sm: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+}
+
+body {
+    background-color: var(--color-brutal-bg);
+    color: var(--color-brutal-border);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
