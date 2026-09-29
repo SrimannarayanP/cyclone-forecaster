@@ -19,11 +19,11 @@ export default function App() {
     const [assets, setAssets] = useState([])
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/hazards/surge').then(res => setSurgeData(res.data)).catch(err => console.error("Failed to load surge data", err))
-        axios.get('http://localhost:8000/api/advisories').then(res => {
+        axios.get('https://cyclone-forecaster-91eh.onrender.com/api/hazards/surge').then(res => setSurgeData(res.data)).catch(err => console.error("Failed to load surge data", err))
+        axios.get('https://cyclone-forecaster-91eh.onrender.com/api/advisories').then(res => {
             if (res.data && res.data.length > 0) setAdvisory(res.data[0])
         }).catch(err => console.error("Failed to load advisories", err))
-        axios.get('http://localhost:8000/api/vulnerabilities').then(res => setAssets(res.data)).catch(err => console.error("Failed to load assets", err))
+        axios.get('https://cyclone-forecaster-91eh.onrender.com/api/vulnerabilities').then(res => setAssets(res.data)).catch(err => console.error("Failed to load assets", err))
     }, [])
 
     return (
