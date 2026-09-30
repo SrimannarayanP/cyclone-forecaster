@@ -1,17 +1,21 @@
 # d8_flow.py
 
 
-from pysheds.grid import Grid
-from rasterio.features import shapes
-from shapely.geometry import shape
-
-import geopandas as gpd
 import numpy as np
 
-import json, os, rasterio, warnings
+import json, os, warnings
 
 
 def calculate_flow(lat, lon):
+    from pysheds.grid import Grid
+    from rasterio.features import shapes
+    from shapely.geometry import shape
+    
+    import geopandas as gpd
+
+    import rasterio
+
+    
     warnings.filterwarnings('ignore')
 
     dem_path = 'data/srtm_dem.tif'
