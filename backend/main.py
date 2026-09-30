@@ -11,7 +11,7 @@ from algorithms.gen_advisories import generate_warnings
 from algorithms.surge_inundation import predict_surge
 from algorithms.vulnerability_scorer import calculate_vulnerability
 
-import json, uvicorn
+import json, os, uvicorn
 
 
 app = FastAPI(title = "Storm Grid Live API")
@@ -55,4 +55,6 @@ def generate_live_forecast_stream(storm: StormParameters):
     return StreamingResponse(event_generator(), media_type = 'application/x-ndjson')
 
 
-uvicorn.run('main:app', host = '0.0.0.0', port = 8000, reload = True)
+port = int(os.environ.get('PORT', 10000))
+
+uvicorn.run('main:app', host = '0.0.0.0', port = port)
