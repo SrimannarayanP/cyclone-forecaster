@@ -1,14 +1,16 @@
 # surge_inundation.py
 
 
-from rasterio.features import shapes
-
 import numpy as np
 
-import os, rasterio
+import os
 
 
 def predict_surge(lat, lon, wind_kph, pressure_mb):
+    from rasterio.features import shapes
+    
+    import rasterio
+    
     dem_path = 'data/srtm_dem.tif'
 
     if not os.path.exists(dem_path): 
