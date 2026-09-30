@@ -51,6 +51,9 @@ python -m venv venv
 source venv/bin/activate  # Or `venv\Scripts\activate` on Windows
 pip install -r requirements.txt
 
+# Add your Gemini API key
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+
 # Start the ASGI server
 uvicorn main:app --reload
 ```
@@ -62,7 +65,7 @@ npm install
 
 # Add your Mapbox token
 echo "VITE_MAPBOX_TOKEN=your_token_here" > .env
-```
 
 # Start the Vite dev server
 npm run dev
+```
