@@ -1,9 +1,9 @@
 # cyclone-forecaster
 
-STORM-GRID: Parametric Cyclone Impact Engine
-STORM-GRID is an AI-assisted predictive vulnerability platform engineered for the coastal district of Puri, Odisha. It fuses geospatial hydrology with LLM orchestration to generate localized, actionable early warnings for municipal authorities.
+STORM-GRID: PARAMETRIC CYCLONE IMPACT ENGINE
+**STORM-GRID** is an AI-assisted predictive vulnerability platform engineered for the coastal district of Puri, Odisha. It fuses geospatial hydrology with LLM orchestration to generate localized, actionable early warnings for municipal authorities.
 
-⚠️ LIVE DEMO NOTICE: RENDER FREE TIER 
+⚠️ LIVE DEMO NOTICE: RENDER FREE TIER
 The FastAPI computation engine is deployed on Render's free tier, which spins down after 15 minutes of inactivity. When you trigger your first storm scenario, the backend may take 50–60 seconds to wake up. Please be patient. Once the engine is awake, the NDJSON stream will populate the map in real-time.
 
 
