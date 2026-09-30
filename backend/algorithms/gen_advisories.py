@@ -3,108 +3,89 @@
 
 from dotenv import load_dotenv
 
-import json, os, requests, time
+import json, os, requests
 
 
-def generate_early_warnings(assets_path, output_path):
+def generate_warnings(crit_assets):
+    if not crit_assets:
+        return {
+            'ward_id': 'Puri_Coastal_Zone',
+            'advisory_text_en': "No critical assets at immediate risk.",
+            'advisory_text_od': "କୌଣସି ଜରୁରୀକାଳୀନ ସମ୍ପତ୍ତି ବିପଦରେ ନାହିଁ।",
+            'severity_level': 'CLEAR'
+        }
+
     load_dotenv()
 
-    print(f"Loading vulnerable assets from {assets_path}...")
-
-    if not os.path.exists(assets_path):
-        raise FileNotFoundError("at_risk_assets.json missing. Run vulnerability_scorer.py 1st.")
-
-    with open(assets_path, 'r') as f:
-        assets = json.load(f)
-
-    if not assets:
-        print("No assets at risk. Skipping advisory gen.")
-
-        return
-
-    crit_assets = assets[:5] # Slice the top 5 most crit assets to avoid token limits & keep the demo focused.
-
+    top_assets = crit_assets[:5]
+    
     api_key = os.environ.get('GEMINI_API_KEY')
-
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY env var is missing.")
-
+    
     valid_model = 'models/gemini-3.8-flash'
 
-    print(f"Using explicitly recommended model: {valid_model}")
+    if not api_key:
 
+        return {
+            'ward_id': 'SYSTEM_AUTH',
+            'advisory_text_en': "The system is missing the API key required to generate an advisory.",
+            'advisory_text_od': "ଏପିଆଇ କି (API Key) ନାହିଁ।",
+            'severity_level': 'OFFLINE'
+        }
+    
     prompt = f"""
-        You are an emergency mgmt AI for the coastal district of Puri, Odisha. A severe cyclone is approaching. Our parametric wind-field & DEM-based flood routing
-        models have ID'd the following crit infra assets at highest risk of storm surge & inland flooding:
-
-        {json.dumps(crit_assets, indent = 2)}
-
-        Gen an actionable early-warning advisory for municipal authorities. You must output STRICTLY in the following JSON schema. Do not include md formatting or
-        conversational text.
-
+        You are an emergency mgmt AI for Puri, Odisha. A severe cyclone is approaching.
+        Crit infra at risk:
+        {json.dumps(top_assets, indent = 2)}
+        
+        Gen an actionable early-warning advisory. Output STRICTLY in JSON:
         {{
             "ward_id": "Puri_Coastal_Zone",
-            "advisory_text_en": "Plain lang English action plan (e.g., evac hospitals, reroute power grid)...",
-            "advisory_text_od": "Accurate Odia translation of the English text...",
+            "advisory_text_en": "Plain English action plan...",
+            "advisory_text_od": "Odia translation...",
             "severity_level": "CRITICAL"
         }}
     """
-
+    
     url = f"https://generativelanguage.googleapis.com/v1beta/{valid_model}:generateContent?key={api_key}"
-    headers = {'Content-Type': 'application/json'}
-    payload = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'temperature': 0.2}}
 
-    print("Executing raw REST call to Gemini API...")
+    try:
+        res = requests.post(url, headers = {'Content-Type': 'application/json'}, json = {'contents': [{'parts': [{'text': prompt}]}]}, timeout = 8)
+        
+        if res.status_code == 503:
 
-    max_retries = 5
+            return {
+                'ward_id': 'SYSTEM_API',
+                'advisory_text_en': "The AI service is currently too busy to respond. Please rely on standard evacuation protocols.",
+                'advisory_text_od': "ଜେମିନି ଏପିଆଇ ବର୍ତ୍ତମାନ ବ୍ୟସ୍ତ ଅଛି (503)। ଷ୍ଟାଣ୍ଡାର୍ଡ ପ୍ରୋଟୋକଲ୍ ବ୍ୟବହାର କରନ୍ତୁ।",
+                'severity_level': 'OVERLOADED'
+            }
 
-    for attempt in range(max_retries):
-        res = requests.post(url, headers = headers, json = payload)
+        res.raise_for_status()
+        
+        raw = res.json()['candidates'][0]['content']['parts'][0]['text']
+    
+        return json.loads(raw.strip().removeprefix('```json').removesuffix('```').strip())
+    except requests.exceptions.Timeout:
 
-        if res.status_code == 200:
-            data = res.json()
+        return {
+            'ward_id': 'SYSTEM_NET',
+            'advisory_text_en': "The AI took too long to generate a response. Please review the map data & issue warnings manually.",
+            'advisory_text_od': "ପରାମର୍ଶ ପ୍ରସ୍ତୁତି ସମୟ ସୀମା ପାର ହୋଇଯାଇଛି। ମାନୁଆଲ୍ ସମୀକ୍ଷା ଆରମ୍ଭ କରନ୍ତୁ।",
+            'severity_level': 'TIMEOUT'
+        }
+    except requests.exceptions.RequestException as e:
 
-            try:
-                raw_text = data['candidates'][0]['content']['parts'][0]['text']
-                raw_text = raw_text.strip().removeprefix('```json').removesuffix('```').strip()
-                advisory_json = json.loads(raw_text)
+        return {
+            'ward_id': 'SYSTEM_NET',
+            'advisory_text_en': f"We lost the network connection while attempting to reach the AI service.",
+            'advisory_text_od': "ନେଟୱାର୍କ ତ୍ରୁଟି।",
+            'severity_level': 'OFFLINE'
+        }
+    except json.JSONDecodeError:
 
-                os.makedirs(os.path.dirname(output_path), exist_ok = True)
-
-                with open(output_path, 'w', encoding = 'utf-8') as f:
-                    json.dump([advisory_json], f, ensure_ascii = False, indent = 4)
-
-                print(f"Advisory successfully gen'd & written to {output_path}")
-
-                return
-            except Exception as e:
-                print(f"Failed to parse res: {e}")
-
-                return
-        elif res.status_code == 503:
-            wait_time = 2**attempt
-
-            print(f"API busy (503). Retrying in {wait_time} secs (Attempt {attempt + 1}/{max_retries})...")
-
-            time.sleep(wait_time)
-        else:
-            print(f"REST API Err: {res.text}")
-
-            return
-
-    print("API completely unresponsive. Writing mock fallback data to unblock frontend dev.")
-
-    mock_data = [{
-        "ward_id": "Puri_Coastal_Zone",
-        "advisory_text_en": "Evacuate low-lying hospitals immediately. Reroute power grids away from surge zones.",
-        "advisory_text_od": "ତୁରନ୍ତ ତଳିଆ ଡାକ୍ତରଖାନାଗୁଡ଼ିକୁ ଖାଲି କରନ୍ତୁ। ବିଦ୍ୟୁତ୍ ଗ୍ରୀଡ୍‌କୁ ସର୍ଜ ଜୋନ୍‌ରୁ ଅନ୍ୟତ୍ର ସ୍ଥାନାନ୍ତର କରନ୍ତୁ।",
-        "severity_level": "CRITICAL"
-    }]
-
-    os.makedirs(os.path.dirname(output_path), exist_ok = True)
-
-    with open(output_path, 'w', encoding = 'utf-8') as f:
-        json.dump(mock_data, f, ensure_ascii = False, indent = 4)
-
-
-generate_early_warnings('outputs/at_risk_assets.json', 'outputs/advisories.json')
+        return {
+            'ward_id': 'SYSTEM_PARSE',
+            'advisory_text_en': "We received an unreadable response from the AI. Manual review is required.",
+            'advisory_text_od': "ଏଲଏଲଏମ୍ ତ୍ରୁଟିପୂର୍ଣ୍ଣ ତଥ୍ୟ ପ୍ରଦାନ କରିଛି। ମାନୁଆଲ୍ ଓଭରରାଇଡ୍ ଅପେକ୍ଷାରେ ଅଛି।",
+            'severity_level': 'PARSE_ERROR'
+        }
