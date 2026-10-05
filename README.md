@@ -1,4 +1,4 @@
-# cyclone-forecaster
+# STORM-GRID
 
 STORM-GRID: PARAMETRIC CYCLONE IMPACT ENGINE
 **STORM-GRID** is an AI-assisted predictive vulnerability platform engineered for the coastal district of Puri, Odisha. It fuses geospatial hydrology with LLM orchestration to generate localized, actionable early warnings for municipal authorities.
